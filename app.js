@@ -11,6 +11,21 @@ var goalsRouter = require('./routes/goals');
 
 var app = express();
 
+// Import mongoose for MongoDB connection
+
+const mongoose = require('mongoose');
+// Connect to MongoDB
+mongoose.connect('mongodb+srv://josorio408:xAG4dG4eVZFURvdi@goalsandtasksbd.yugftxm.mongodb.net/?retryWrites=true&w=majority&appName=GoalsAndTasksBD');
+mongoose.connection.on('error', (err) => {
+  console.error('MongoDB connection error:', err);
+}
+);
+mongoose.connection.once('open', () => {
+  console.log('Connected to MongoDB');
+}
+);
+
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');

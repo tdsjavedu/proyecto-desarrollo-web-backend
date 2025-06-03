@@ -1,32 +1,47 @@
+const mongoose = require('mongoose');
+
 var express = require('express');
 const route = require('.');
 var router = express.Router();
 
-let goals = [
-  { id: 1, name: 'Goal 1', description: 'Description for Task 1' },
-  { id: 2, name: 'Goal 2', description: 'Description for Task 2' },
-  { id: 3, name: 'Goal 3', description: 'Description for Task 3' }
-];
+// Define Goal schema and model
+const goalSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  description: { type: String, required: true }
+});
+const Goal = mongoose.model('Goal', goalSchema);
 
-router.get('/getGoal', function(req, res, next) {
-  res.json(goals);
-})
+router.get('/getGoal', async (req, res, next) => {
+   try {
+    const goals = await Goal.find();
+    res.status(200).json(tasks);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching tasks', error: err });
 
-router.delete('/deleteGoal/:id', function(req, res, next) {
-    const goalId = parseInt(req.params.id, 10);
-    goals = goals.filter(goal => goal.id !== goalId);
-    res.json({ message: 'Goal deleted successfully' });
-    }
-    );
+  }
+});
 
-router.post('/addGoal', function(req, res, next) {
-    const newGoal = {
-        id: goals.length + 1,
-        name: req.body.name,
-        description: req.body.description
-    };
-    goals.push(newGoal);
-    res.json({ message: 'Goal added successfully', task: newGoal });
+router.delete('/deleteGoal/:id', async (req, res, next) => {
+try {
+    await Goal.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: 'Goal deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting task', error: err });
+
+  }
+   });
+
+router.post('/addGoal', async (req, res, next) => {
+    try {
+    const newGoal = new Goal({
+      name: req.body.name,
+      description: req.body.description
+    });
+    await newGoal.save();
+    res.status(200).json({ message: 'Goal added successfully', goal: newGoal });
+  } catch (err) {
+    res.status(400).json({ message: 'Name and description are required' });
+  }
 });
 
 module.exports = router;
